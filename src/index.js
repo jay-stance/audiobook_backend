@@ -14,10 +14,30 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Middleware
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+  : ['http://localhost:5173', 'http://localhost:5175', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5175', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    const allowed = corsOrigins;
+    console.log(`[CORS] Incoming origin: ${origin}`);
+    console.log(`[CORS] Allowed origins: ${JSON.stringify(allowed)}`);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowed.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.error(`[CORS] Blocked by CORS: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
+app.use(cors())
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
