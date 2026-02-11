@@ -22,7 +22,11 @@ router.get('/', async (req, res) => {
 // GET /api/library/:id — Get single book with full text
 router.get('/:id', async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id);
+    const deviceId = req.headers['x-device-id'];
+    const query = { _id: req.params.id };
+    if (deviceId) query.deviceId = deviceId;
+
+    const book = await Book.findOne(query);
     if (!book) {
       return res.status(404).json({ error: 'Book not found' });
     }
@@ -35,7 +39,11 @@ router.get('/:id', async (req, res) => {
 // DELETE /api/library/:id — Delete a book
 router.delete('/:id', async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id);
+    const deviceId = req.headers['x-device-id'];
+    const query = { _id: req.params.id };
+    if (deviceId) query.deviceId = deviceId;
+
+    const book = await Book.findOne(query);
     if (!book) {
       return res.status(404).json({ error: 'Book not found' });
     }
