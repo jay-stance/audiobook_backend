@@ -17,13 +17,15 @@ router.post('/', async (req, res) => {
       completionPercentage
     } = req.body;
 
-    if (!bookId) {
-      return res.status(400).json({ error: 'bookId is required' });
+    const deviceId = req.headers['x-device-id'];
+    if (!bookId || !deviceId) {
+      return res.status(400).json({ error: 'bookId and deviceId are required' });
     }
 
     const progress = await Progress.findOneAndUpdate(
-      { bookId },
+      { bookId, deviceId },
       {
+        deviceId, // Ensure it's set on insert
         currentPage: currentPage || 0,
         currentPosition: currentPosition || 0,
         playbackSpeed: playbackSpeed || 1.0,
@@ -45,7 +47,10 @@ router.post('/', async (req, res) => {
 // GET /api/progress/:bookId — Get reading progress for a book
 router.get('/:bookId', async (req, res) => {
   try {
-    const progress = await Progress.findOne({ bookId: req.params.bookId });
+    const deviceId = req.headers['x-device-id'];
+    if (!deviceId) return res.json({ success: true, progress: null });
+
+    const progress = await Progress.findOne({ bookId: req.params.bookId, deviceId });
     res.json({ success: true, progress: progress || null });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -55,7 +60,10 @@ router.get('/:bookId', async (req, res) => {
 // GET /api/progress — Get all reading progress (for stats)
 router.get('/', async (req, res) => {
   try {
-    const allProgress = await Progress.find().sort({ lastReadAt: -1 });
+    const deviceId = req.headers['x-device-id'];
+    const query = deviceId ? { deviceId } : { _id: null };
+    
+    const allProgress = await Progress.find(query).sort({ lastReadAt: -1 });
     res.json({ success: true, progress: allProgress });
   } catch (error) {
     res.status(500).json({ error: error.message });

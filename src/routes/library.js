@@ -7,8 +7,11 @@ const router = express.Router();
 // GET /api/library — List all books
 router.get('/', async (req, res) => {
   try {
-    const books = await Book.find()
-      .select('-rawText -cleanedText -pages')
+    const deviceId = req.headers['x-device-id'];
+    const query = deviceId ? { deviceId } : { _id: null }; // Return nothing if no device ID
+
+    const books = await Book.find(query)
+      .select('-rawText -cleanedText -pages -__v')
       .sort({ createdAt: -1 });
     res.json({ success: true, books });
   } catch (error) {

@@ -14,6 +14,11 @@ const progressSchema = new mongoose.Schema({
     ref: 'Book',
     required: true
   },
+  deviceId: {
+    type: String,
+    required: true,
+    index: true
+  },
   currentPage: {
     type: Number,
     default: 0

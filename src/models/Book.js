@@ -53,6 +53,11 @@ const bookSchema = new mongoose.Schema({
   s3Url: {
     type: String,
     default: null
+  },
+  deviceId: {
+    type: String,
+    required: true,
+    index: true
   }
 }, {
   timestamps: true
