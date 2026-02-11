@@ -88,6 +88,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
     const author = pdfData.info?.Author || 'Unknown';
 
     // Save to MongoDB
+    const deviceId = req.headers['x-device-id'];
     const book = new Book({
       title,
       author,
@@ -97,7 +98,8 @@ router.post('/', upload.single('pdf'), async (req, res) => {
       rawText: pdfData.text,
       cleanedText: cleanedFullText,
       fileSize: req.file.size,
-      coverColor
+      coverColor,
+      deviceId: deviceId || 'unknown'
     });
 
     await book.save();
